@@ -134,3 +134,19 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# ob_radio_2
+# Keep audio files out of the public repo (size + copyright)
+songs/*.ogg
+songs/*.mp3
+songs/*.wav
+songs/*.webm
+
+# Local editor files
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
