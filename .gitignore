@@ -142,6 +142,11 @@ songs/*.mp3
 songs/*.wav
 songs/*.webm
 
+# Tool binaries & local helper (downloaded locally, not committed)
+tools/bin/
+tools/download_song.sh
+tools/download_song.bat
+
 # Local editor files
 .vscode/
 .idea/

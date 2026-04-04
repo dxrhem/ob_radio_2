@@ -23,7 +23,7 @@ Config.Stations = {
     },
     {
         id = 'OB_RADIO_2',
-        label = 'Sleep Token 24/7 FM',
+        label = 'Sleep Token 24/7.FM',
         logo = 'sleeptoken.png',
         songs = {
             { file = 'gethsemane.ogg', title = 'Gethsemane', artist = 'Sleep Token', duration = 384 },
@@ -37,12 +37,28 @@ Config.Stations = {
             { file = 'stepaway.ogg', title = 'Step Away', artist = 'Chase & Status', duration = 248 },
         },
     },
-        {
+    {
         id = 'OB_RADIO_4',
-        label = '24/7 Dave FM',
+        label = '24/7 Dave.FM',
         logo = 'dave.png',
         songs = {
             { file = 'verdansk.ogg', title = 'Verdansk', artist = 'Dave', duration = 319 },
+        },
+    },
+    {
+        id = 'OB_RADIO_5',
+        label = '24/7 Drinks On Me.FM',
+        logo = 'drinksonme.png',
+        songs = {
+            { file = 'wherehaveyoubeen.ogg', title = 'Where Have You Been', artist = 'Drinks On Me', duration = 180 },
+        },
+    },
+    {
+        id = 'OB_RADIO_6',
+        label = '24/7 Billie Eilish.FM',
+        logo = 'billie.png',
+        songs = {
+            { file = 'happierthanever.ogg', title = 'Happier Than Ever', artist = 'Billie Eilish', duration = 315 },
         },
     },
 }
