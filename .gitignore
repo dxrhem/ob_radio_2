@@ -146,6 +146,9 @@ songs/*.webm
 tools/bin/
 tools/download_song.sh
 tools/download_song.bat
+tools/.env
+tools/.env.example
+tools/spotify_playlist.js
 
 # Local editor files
 .vscode/

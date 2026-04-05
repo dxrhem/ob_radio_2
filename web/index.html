@@ -32,8 +32,16 @@
 
     <!-- Now Playing Bar (only when in vehicle, wheel closed) -->
     <div id="now-playing-bar" class="hidden">
-        <div id="npb-label">Now Playing:</div>
-        <div id="npb-song"></div>
+        <img id="npb-logo" alt="">
+        <div id="npb-info">
+            <div id="npb-title"></div>
+            <div id="npb-meta">
+                <svg id="npb-play" viewBox="0 0 16 16" width="12" height="12"><path fill="currentColor" d="M4 2.5v11l10-5.5z"/></svg>
+                <span id="npb-station"></span>
+                <span class="npb-sep">•</span>
+                <span id="npb-artist"></span>
+            </div>
+        </div>
     </div>
 
     <script src="js/audio.js"></script>

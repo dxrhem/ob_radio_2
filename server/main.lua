@@ -99,6 +99,34 @@ lib.callback.register('ob_radio_2:getVehicleStation', function(source, vehicleNe
     }
 end)
 
+-- Admin skip command (requires ACE permission "ob_radio_2.skip")
+-- Grant in server.cfg: add_ace group.admin "ob_radio_2.skip" allow
+RegisterCommand('skipsong', function(source, args)
+    -- source == 0 means it was executed from the server console
+    if source ~= 0 then
+        if not IsPlayerAceAllowed(source, 'ob_radio_2.skip') then
+            TriggerClientEvent('chat:addMessage', source, { args = { '[Radio]', '^1You are not allowed to use this command.' } })
+            return
+        end
+    end
+
+    local stationIndex = tonumber(args[1])
+    if not stationIndex or not Config.Stations[stationIndex] then
+        local msg = ('Usage: /skipsong <stationIndex>   (1-%d)'):format(#Config.Stations)
+        if source == 0 then print(msg)
+        else TriggerClientEvent('chat:addMessage', source, { args = { '[Radio]', msg } }) end
+        return
+    end
+
+    advanceSong(stationIndex)
+
+    local station = Config.Stations[stationIndex]
+    local song = station.songs[stationStates[stationIndex].songIndex]
+    local announce = ('^2Skipped on %s. Now playing: %s — %s'):format(station.label, song.title or '', song.artist or '')
+    if source == 0 then print(announce)
+    else TriggerClientEvent('chat:addMessage', source, { args = { '[Radio]', announce } }) end
+end, true) -- restricted = true (requires ACE)
+
 -- Clean up when vehicle is deleted
 AddEventHandler('entityRemoved', function(entity)
     local netId = NetworkGetNetworkIdFromEntity(entity)

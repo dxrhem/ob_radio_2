@@ -22,7 +22,7 @@ window.addEventListener('message', function(event) {
             if (data.song && data.song.file) {
                 radioAudio.play(data.song.file, data.offset || 0, data.volume || 0.7);
                 radioWheel.currentStation = data.stationIndex;
-                radioWheel.setCurrentSong(data.song);
+                radioWheel.setCurrentSong(data.song, data.station);
             }
             if (data.spatial) radioAudio.updateSpatial(data.spatial);
             break;
@@ -31,6 +31,8 @@ window.addEventListener('message', function(event) {
             radioAudio.stop();
             radioWheel.currentStation = null;
             radioWheel.currentSong = null;
+            radioWheel.currentStationLogo = null;
+            radioWheel.currentStationName = null;
             radioWheel.hideNowPlayingBar();
             radioWheel.updateNowPlaying(null);
             break;

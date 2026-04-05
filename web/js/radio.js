@@ -11,7 +11,10 @@ class RadioWheel {
         this.npArtist = document.getElementById('np-artist');
         this.nowPlaying = document.getElementById('now-playing');
         this.npBar = document.getElementById('now-playing-bar');
-        this.npbSong = document.getElementById('npb-song');
+        this.npbTitle = document.getElementById('npb-title');
+        this.npbArtist = document.getElementById('npb-artist');
+        this.npbLogo = document.getElementById('npb-logo');
+        this.npbStation = document.getElementById('npb-station');
         this.volumeSlider = document.getElementById('volume-slider');
         this.volumeValue = document.getElementById('volume-value');
 
@@ -176,7 +179,15 @@ class RadioWheel {
     showNowPlayingBar() {
         if (!this.currentSong || !this.inVehicle) return;
         const { title = '', artist = '' } = this.currentSong;
-        this.npbSong.textContent = artist ? `${title} — ${artist}` : title;
+        this.npbTitle.textContent = title;
+        this.npbArtist.textContent = artist;
+        this.npbStation.textContent = this.currentStationName || '';
+        if (this.currentStationLogo) {
+            this.npbLogo.src = 'img/' + this.currentStationLogo;
+            this.npbLogo.style.display = '';
+        } else {
+            this.npbLogo.style.display = 'none';
+        }
         this.npBar.classList.remove('hidden');
     }
 
@@ -190,8 +201,12 @@ class RadioWheel {
         else if (!inVehicle) this.hideNowPlayingBar();
     }
 
-    setCurrentSong(song) {
+    setCurrentSong(song, station) {
         this.currentSong = song;
+        if (station) {
+            if (station.logo) this.currentStationLogo = station.logo;
+            if (station.label) this.currentStationName = station.label;
+        }
         this.updateNowPlaying(song);
         if (!this.isOpen) this.showNowPlayingBar();
     }

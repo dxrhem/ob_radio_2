@@ -252,13 +252,15 @@ body {
     right: 18px;
     transform: translateY(-50%);
     display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 2px;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px 10px 10px;
+    background: rgba(30, 30, 30, 0.9);
+    border-radius: 8px;
     z-index: 5000;
     pointer-events: none;
     animation: npbFadeIn 250ms ease-out;
-    text-shadow: 0 2px 6px rgba(0,0,0,0.9);
+    max-width: 320px;
 }
 
 @keyframes npbFadeIn {
@@ -266,16 +268,55 @@ body {
     to { opacity: 1; transform: translate(0, -50%); }
 }
 
-#npb-label {
-    font-size: 11px;
-    font-weight: 700;
-    color: rgba(255,255,255,0.65);
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
+#npb-logo {
+    width: 48px;
+    height: 48px;
+    border-radius: 4px;
+    object-fit: cover;
+    display: block;
+    flex-shrink: 0;
 }
 
-#npb-song {
+#npb-info {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.25;
+    min-width: 0;
+}
+
+#npb-title {
     font-size: 14px;
     font-weight: 600;
     color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#npb-meta {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: 400;
+    color: #aaa;
+    margin-top: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+#npb-play {
+    flex-shrink: 0;
+    color: #aaa;
+}
+
+#npb-meta .npb-sep {
+    color: #aaa;
+    font-weight: 700;
+    line-height: 1;
+}
+
+#npb-station, #npb-artist {
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
