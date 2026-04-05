@@ -35,6 +35,7 @@ Config.Stations = {
         logo = 'dnb.png',
         songs = {
             { file = 'stepaway.ogg', title = 'Step Away', artist = 'Chase & Status', duration = 248 },
+            { file = 'nightshift.ogg', title = 'Night Shift', artist = 'Charlotte Pink', duration = 175 },
         },
     },
     {

@@ -69,12 +69,20 @@ CreateThread(function()
             end
         elseif not isInVehicle and wasInVehicle then
             if isWheelOpen then closeWheel() end
-            -- Instant muffle when exiting vehicle (body blocks sound)
             if currentStation then
-                SendNUIMessage({
-                    action = 'updateSpatial',
-                    spatial = { volume = playerVolume * 0.55, filterFreq = 1800 },
-                })
+                -- If the vehicle's engine is off, shut the radio off entirely.
+                -- Otherwise apply the instant body-block muffle.
+                local engineOff = lastRadioVehicle and DoesEntityExist(lastRadioVehicle)
+                    and not GetIsVehicleEngineRunning(lastRadioVehicle)
+                if engineOff then
+                    SendNUIMessage({ action = 'stopAudio' })
+                    currentStation = nil
+                else
+                    SendNUIMessage({
+                        action = 'updateSpatial',
+                        spatial = { volume = playerVolume * 0.55, filterFreq = 1800 },
+                    })
+                end
             end
         elseif isInVehicle and wasInVehicle and currentStation then
             -- Already in vehicle — ensure full volume/no filter (clears any lingering muffle)
