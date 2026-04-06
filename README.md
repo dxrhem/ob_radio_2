@@ -30,20 +30,6 @@ A custom synced vehicle radio system for FiveM with a GTA V-style wheel UI, spat
 5. Edit `config.lua` to define your stations
 6. Restart the server
 
-## Adding Songs
-
-Download songs using the bundled tool:
-
-```bash
-tools\download_song.bat "youtube-url" filename_without_extension
-```
-
-Then get durations for config:
-
-```bash
-node tools/song_durations.js
-```
-
 ## Configuration
 
 ### Stations
@@ -96,43 +82,6 @@ All bindings are rebindable in FiveM's Key Bindings menu.
 ```lua
 exports.ob_radio_2:getCurrentStation() -- returns station table or nil
 exports.ob_radio_2:isRadioPlaying()    -- returns boolean
-```
-
-## TODO — UI Improvements
-
-Planned changes to match the GTA V radio wheel more closely:
-
-- [ ] Selected station always at bottom center of wheel
-- [ ] Off button as part of the ring, not separate
-- [ ] Stronger blue glow on selected station
-- [ ] GTA-style condensed font
-- [ ] Remove volume slider from wheel (keep keyboard control only)
-- [ ] Station name, artist, and song title stacked in center
-
-## File Structure
-
-```
-ob_radio_2/
-├── config.lua
-├── client/
-│   ├── main.lua          # keybinds, vehicle polling, NUI callbacks, native radio disable
-│   ├── spatial.lua        # distance-based volume and filter
-│   └── environment.lua    # interior/tunnel/underwater detection
-├── server/
-│   └── main.lua           # station sync, song rotation, skip command
-├── web/
-│   ├── index.html
-│   ├── css/radio.css
-│   ├── js/
-│   │   ├── audio.js       # Web Audio API playback
-│   │   ├── radio.js        # wheel UI logic
-│   │   └── nui.js          # NUI message handler
-│   └── img/                # station logos
-├── songs/                  # .ogg audio files
-└── tools/
-    ├── download_song.bat   # download songs via yt-dlp
-    ├── song_durations.js   # get durations for config
-    └── bin/                # yt-dlp + ffmpeg binaries
 ```
 
 ## Credits
