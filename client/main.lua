@@ -97,11 +97,12 @@ CreateThread(function()
         elseif not isInVehicle and wasInVehicle then
             if isWheelOpen then closeWheel() end
             if currentStation then
-                -- If the vehicle's engine is off, shut the radio off entirely.
-                -- Otherwise apply the instant body-block muffle.
-                local engineOff = lastRadioVehicle and DoesEntityExist(lastRadioVehicle)
-                    and not GetIsVehicleEngineRunning(lastRadioVehicle)
-                if engineOff then
+                -- If the vehicle is destroyed, doesn't exist, or engine is off — kill audio
+                local vehicleGone = not lastRadioVehicle
+                    or not DoesEntityExist(lastRadioVehicle)
+                    or IsEntityDead(lastRadioVehicle)
+                    or not GetIsVehicleEngineRunning(lastRadioVehicle)
+                if vehicleGone then
                     SendNUIMessage({ action = 'stopAudio' })
                     currentStation = nil
                 else

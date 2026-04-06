@@ -48,6 +48,15 @@ CreateThread(function()
             })
             Wait(500)
         elseif currentStation then
+            -- Check if last radio vehicle is destroyed
+            if lastRadioVehicle and (not DoesEntityExist(lastRadioVehicle) or IsEntityDead(lastRadioVehicle)) then
+                SendNUIMessage({ action = 'stopAudio' })
+                currentStation = nil
+                lastRadioVehicle = nil
+                Wait(500)
+                goto continue
+            end
+
             -- Outside vehicle but radio still playing
             local playerCoords = GetEntityCoords(PlayerPedId())
             local _, dist = findNearestRadioVehicle(playerCoords)
@@ -74,5 +83,6 @@ CreateThread(function()
         else
             Wait(500)
         end
+        ::continue::
     end
 end)
