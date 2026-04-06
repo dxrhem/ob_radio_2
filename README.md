@@ -15,7 +15,6 @@ A custom synced vehicle radio system for FiveM with a GTA V-style wheel UI, spat
 - **Now Playing bar** — minimal text display, only shown while driving, toggleable per-player
 - **Emergency vehicle lockout** — automatically disables the radio in police/ambulance/fire vehicles
 - **Multiple songs per station** with server-driven rotation
-- **Song download tool** — bundled `yt-dlp` + `ffmpeg` for easy `.ogg` downloads
 
 ## Requirements
 
