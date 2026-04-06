@@ -1,6 +1,3 @@
--- ob_radio_2 Client - Spatial audio module
--- Fades + muffles radio audio based on distance from the vehicle playing it.
-
 local nearbyVehicles = {} -- [netId] = stationIndex (from broadcasts)
 lastRadioVehicle = nil    -- resource-global, also updated from main.lua when entering a vehicle
 
@@ -41,10 +38,13 @@ end
 CreateThread(function()
     while true do
         if isInVehicle and currentStation then
-            -- Inside vehicle — full volume, no filter
+            -- Inside vehicle — apply environment effects (wind, tunnel, interior, etc.)
             SendNUIMessage({
                 action = 'updateSpatial',
-                spatial = { volume = playerVolume, filterFreq = 22000 },
+                spatial = {
+                    volume = playerVolume * (envVolumeMul or 1.0),
+                    filterFreq = envFilterFreq or 22000,
+                },
             })
             Wait(500)
         elseif currentStation then
@@ -61,6 +61,10 @@ CreateThread(function()
             local distRatio = clampedDist / Config.MaxAudioDistance
             local volume = bodyBlockVolume * (1.0 - distRatio) * playerVolume
             local filterFreq = bodyBlockFilter - (distRatio * (bodyBlockFilter - 300))
+
+            -- Combine with environment effects
+            volume = volume * (envVolumeMul or 1.0)
+            filterFreq = math.min(filterFreq, envFilterFreq or 22000)
 
             SendNUIMessage({
                 action = 'updateSpatial',

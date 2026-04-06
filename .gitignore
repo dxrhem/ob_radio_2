@@ -147,6 +147,10 @@ tools/bin/
 tools/download_song.sh
 tools/download_song.bat
 tools/.env
+tools/make_dj_intro.js
+tools/node_modules/
+tools/package.json
+tools/package-lock.json
 tools/.env.example
 tools/spotify_playlist.js
 

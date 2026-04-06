@@ -14,22 +14,8 @@ class RadioWheel {
         this.npbTitle = document.getElementById('npb-title');
         this.npbArtist = document.getElementById('npb-artist');
         this.npbLogo = document.getElementById('npb-logo');
-        this.npbStation = document.getElementById('npb-station');
         this.volumeSlider = document.getElementById('volume-slider');
         this.volumeValue = document.getElementById('volume-value');
-
-        this.setupEvents();
-    }
-
-    setupEvents() {
-        this.volumeSlider.addEventListener('input', (e) => {
-            const vol = parseInt(e.target.value);
-            this.volumeValue.textContent = vol + '%';
-            fetch('https://ob_radio_2/setVolume', {
-                method: 'POST',
-                body: JSON.stringify({ volume: vol / 100 })
-            });
-        });
     }
 
     get offSlotIndex() { return this.stations.length; }
@@ -83,7 +69,7 @@ class RadioWheel {
         const radius = 300;
         const offIdx = this.offSlotIndex;
 
-        const placeItem = (i, content, extraClasses, onClick) => {
+        const placeItem = (i, content, extraClasses) => {
             const angleDeg = 180 - (offIdx - i) * step;
             const el = document.createElement('div');
             el.className = 'station-item' + (extraClasses ? ' ' + extraClasses : '');
@@ -93,14 +79,10 @@ class RadioWheel {
 
             const inner = document.createElement('div');
             inner.className = 'icon-inner';
-            if (content instanceof Node) {
-                inner.appendChild(content);
-            } else {
-                inner.textContent = content;
-            }
+            if (content instanceof Node) inner.appendChild(content);
+            else inner.textContent = content;
             el.appendChild(inner);
 
-            el.addEventListener('click', onClick);
             this.stationsRing.appendChild(el);
         };
 
@@ -115,11 +97,10 @@ class RadioWheel {
             } else {
                 content = '📻';
             }
-            placeItem(i, content, extra, () => { this.selectedIndex = i; this.updateSelection(); });
+            placeItem(i, content, extra);
         });
 
-        const offExtra = 'off-slot' + (this.currentStation === null ? ' active' : '');
-        placeItem(offIdx, '⏻', offExtra, () => { this.selectedIndex = offIdx; this.updateSelection(); });
+        placeItem(offIdx, '⏻', 'off-slot' + (this.currentStation === null ? ' active' : ''));
 
         this.updateSelection();
     }
@@ -176,12 +157,27 @@ class RadioWheel {
         this.nowPlaying.classList.remove('hidden');
     }
 
+    _setScrollText(container, text) {
+        const inner = container.querySelector('.scroll-inner');
+        if (!inner) return;
+        // Avoid resetting the animation if text didn't change
+        if (container.dataset.text === text) return;
+        container.dataset.text = text;
+
+        inner.textContent = text;
+        container.classList.remove('scrolling');
+        requestAnimationFrame(() => {
+            if (inner.scrollWidth > container.clientWidth) {
+                const gap = '\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0';
+                inner.textContent = text + gap + text + gap;
+                container.classList.add('scrolling');
+            }
+        });
+    }
+
     showNowPlayingBar() {
         if (!this.currentSong || !this.inVehicle) return;
         const { title = '', artist = '' } = this.currentSong;
-        this.npbTitle.textContent = title;
-        this.npbArtist.textContent = artist;
-        this.npbStation.textContent = this.currentStationName || '';
         if (this.currentStationLogo) {
             this.npbLogo.src = 'img/' + this.currentStationLogo;
             this.npbLogo.style.display = '';
@@ -189,10 +185,19 @@ class RadioWheel {
             this.npbLogo.style.display = 'none';
         }
         this.npBar.classList.remove('hidden');
+        // Needs to be in the DOM/visible before measuring overflow
+        this._setScrollText(this.npbTitle, title);
+        this._setScrollText(this.npbArtist, artist);
     }
 
     hideNowPlayingBar() {
         this.npBar.classList.add('hidden');
+    }
+
+    setVolumeDisplay(vol) {
+        const pct = Math.round((vol || 0) * 100);
+        this.volumeSlider.value = pct;
+        this.volumeValue.textContent = pct + '%';
     }
 
     setInVehicle(inVehicle) {

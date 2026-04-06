@@ -46,6 +46,7 @@ window.addEventListener('message', function(event) {
 
         case 'setVolume':
             radioAudio.setVolume(data.volume);
+            radioWheel.setVolumeDisplay(data.volume);
             break;
 
         case 'updateSpatial':

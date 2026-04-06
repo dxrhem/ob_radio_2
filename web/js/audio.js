@@ -10,7 +10,6 @@ class RadioAudio {
         this.startOffset = 0;
         this.startCtxTime = 0;
         this.currentVolume = 0.7;
-        this.isPlaying = false;
     }
 
     init() {
@@ -75,7 +74,7 @@ class RadioAudio {
 
         const source = this.ctx.createBufferSource();
         source.buffer = buffer;
-        source.loop = true;
+        source.loop = false;
         source.connect(this.gainNode);
 
         const startAt = (offset || 0) % buffer.duration;
@@ -85,19 +84,18 @@ class RadioAudio {
         this.currentFile = songFile;
         this.startOffset = startAt;
         this.startCtxTime = this.ctx.currentTime;
-        this.isPlaying = true;
     }
 
     stop() {
         this._stopCurrentSource();
         this.currentFile = null;
-        this.isPlaying = false;
     }
 
     setVolume(vol) {
         this.currentVolume = Math.max(0, Math.min(1, vol));
         if (this.gainNode) {
-            this.gainNode.gain.setTargetAtTime(this.currentVolume, this.ctx.currentTime, 0.03);
+            // Longer time constant = smoother transitions (env changes, car entry/exit)
+            this.gainNode.gain.setTargetAtTime(this.currentVolume, this.ctx.currentTime, 0.18);
         }
     }
 
@@ -106,7 +104,7 @@ class RadioAudio {
             this.filterNode.frequency.setTargetAtTime(
                 Math.max(200, Math.min(22000, frequency)),
                 this.ctx.currentTime,
-                0.03
+                0.22
             );
         }
     }

@@ -19,14 +19,12 @@
                     <div id="np-title"></div>
                     <div id="np-artist"></div>
                 </div>
+                <div id="volume-control">
+                    <div id="volume-label">VOL</div>
+                    <input type="range" id="volume-slider" min="0" max="100" value="70">
+                    <div id="volume-value">70%</div>
+                </div>
             </div>
-        </div>
-
-        <!-- Volume Control -->
-        <div id="volume-control">
-            <div id="volume-label">VOL</div>
-            <input type="range" id="volume-slider" min="0" max="100" value="70">
-            <div id="volume-value">70%</div>
         </div>
     </div>
 
@@ -34,12 +32,10 @@
     <div id="now-playing-bar" class="hidden">
         <img id="npb-logo" alt="">
         <div id="npb-info">
-            <div id="npb-title"></div>
+            <div id="npb-title"><span class="scroll-inner"></span></div>
             <div id="npb-meta">
                 <svg id="npb-play" viewBox="0 0 16 16" width="12" height="12"><path fill="currentColor" d="M4 2.5v11l10-5.5z"/></svg>
-                <span id="npb-station"></span>
-                <span class="npb-sep">•</span>
-                <span id="npb-artist"></span>
+                <span id="npb-artist"><span class="scroll-inner"></span></span>
             </div>
         </div>
     </div>

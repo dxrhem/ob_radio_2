@@ -1,6 +1,33 @@
--- ob_radio_2 Client - Main radio controls and keybinds
--- Note: isInVehicle, currentStation, playerVolume are intentionally resource-globals
--- so spatial.lua and sync.lua can read them.
+SetUserRadioControlEnabled(false)
+SetFrontendRadioActive(false)
+SetMobileRadioEnabledDuringGameplay(false)
+
+local ped = PlayerPedId()
+local veh = GetVehiclePedIsIn(ped, false)
+if veh ~= 0 then
+    SetVehRadioStation(veh, 'OFF')
+end
+
+-- Keep it disabled every frame while in a vehicle
+CreateThread(function()
+    while true do
+        local veh = GetVehiclePedIsIn(PlayerPedId(), false)
+        if veh ~= 0 then
+            DisableControlAction(0, 85, true)  -- radio wheel
+            DisableControlAction(0, 19, true)  -- radio alt
+            HideHudComponentThisFrame(16)      -- hide native radio HUD
+            SetUserRadioControlEnabled(false)
+            SetVehRadioStation(veh, 'OFF')
+            SetFrontendRadioActive(false)
+            SetMobileRadioEnabledDuringGameplay(false)
+            Wait(0)
+        else
+            SetUserRadioControlEnabled(false)
+            SetFrontendRadioActive(false)
+            Wait(500)
+        end
+    end
+end)
 
 local isWheelOpen = false
 currentStation = nil
@@ -84,39 +111,21 @@ CreateThread(function()
                     })
                 end
             end
-        elseif isInVehicle and wasInVehicle and currentStation then
-            -- Already in vehicle — ensure full volume/no filter (clears any lingering muffle)
-            SendNUIMessage({
-                action = 'updateSpatial',
-                spatial = { volume = playerVolume, filterFreq = 22000 },
-            })
         end
+        -- Note: spatial.lua handles ongoing in-vehicle updateSpatial with env values
         Wait(500)
     end
 end)
 
--- Disable native GTA radio
-if Config.DisableNativeRadio then
-    CreateThread(function()
-        while true do
-            if isInVehicle then
-                local veh = GetVehiclePedIsIn(PlayerPedId(), false)
-                SetUserRadioControlEnabled(false)
-                if veh ~= 0 then SetVehRadioStation(veh, 'OFF') end
-                SetFrontendRadioActive(false)
-            end
-            Wait(1000)
-        end
-    end)
-end
+-- Native radio disable is handled by the thread at the top of this file
 
 -- Open radio wheel
 function openWheel()
     if not isInVehicle or isWheelOpen then return end
     isWheelOpen = true
 
-    SetNuiFocus(true, true)
-    SetNuiFocusKeepInput(true)
+    SetTimecycleModifier('hud_def_blur')
+    SetTimecycleModifierStrength(0.45)
 
     SendNUIMessage({
         action = 'openWheel',
@@ -124,10 +133,6 @@ function openWheel()
         currentStation = currentStation,
         volume = playerVolume,
     })
-
-    if Config.SlowMotionWhileOpen then
-        SetTimeScale(0.3)
-    end
 end
 
 -- Close radio wheel
@@ -135,12 +140,8 @@ function closeWheel()
     if not isWheelOpen then return end
     isWheelOpen = false
 
-    SetNuiFocus(false, false)
+    ClearTimecycleModifier()
     SendNUIMessage({ action = 'closeWheel' })
-
-    if Config.SlowMotionWhileOpen then
-        SetTimeScale(1.0)
-    end
 end
 
 -- Hold radio key to open wheel (default Q, rebindable in FiveM keybinds menu)
@@ -152,12 +153,28 @@ RegisterCommand('-ob_radio_wheel', function()
 end, false)
 RegisterKeyMapping('+ob_radio_wheel', 'Open Radio Wheel (hold)', 'keyboard', 'Q')
 
+-- Volume up/down — only act while wheel is open, rebindable in FiveM keybinds menu
+local function setVolume(vol)
+    playerVolume = math.max(0.0, math.min(1.0, vol))
+    SetResourceKvp('ob_radio_2:volume', tostring(playerVolume))
+    SendNUIMessage({ action = 'setVolume', volume = playerVolume })
+end
+
+RegisterCommand('ob_radio_vol_up', function()
+    if isWheelOpen then setVolume(playerVolume + 0.05) end
+end, false)
+RegisterCommand('ob_radio_vol_down', function()
+    if isWheelOpen then setVolume(playerVolume - 0.05) end
+end, false)
+RegisterKeyMapping('ob_radio_vol_up', 'Radio Volume Up', 'keyboard', 'UP')
+RegisterKeyMapping('ob_radio_vol_down', 'Radio Volume Down', 'keyboard', 'DOWN')
+
 -- Toggle the Now Playing info bar
 RegisterCommand('toggleradioinfo', function()
     showNowPlayingInfo = not showNowPlayingInfo
     SetResourceKvp('ob_radio_2:showInfo', showNowPlayingInfo and 'true' or 'false')
     local msg = showNowPlayingInfo and 'Radio info bar: ^2ON^7' or 'Radio info bar: ^1OFF^7'
-    TriggerEvent('chat:addMessage', { args = { '[Radio]', msg } })
+    lib.notify({ title = 'Radio', description = msg:gsub('%^%d', ''), type = showNowPlayingInfo and 'success' or 'error' })
 end, false)
 TriggerEvent('chat:addSuggestion', '/toggleradioinfo', 'Show/hide the Now Playing info while driving', {})
 
@@ -223,18 +240,6 @@ RegisterNUICallback('turnOff', function(data, cb)
     lib.callback.await('ob_radio_2:tuneOff', false, netId)
     currentStation = nil
     SendNUIMessage({ action = 'stopAudio' })
-    cb({})
-end)
-
-RegisterNUICallback('setVolume', function(data, cb)
-    playerVolume = tonumber(data.volume) or Config.DefaultVolume
-    SetResourceKvp('ob_radio_2:volume', tostring(playerVolume))
-    SendNUIMessage({ action = 'setVolume', volume = playerVolume })
-    cb({})
-end)
-
-RegisterNUICallback('closeWheel', function(_, cb)
-    closeWheel()
     cb({})
 end)
 

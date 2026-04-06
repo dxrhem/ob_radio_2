@@ -1,6 +1,3 @@
--- Server-side radio sync system
--- Tracks what each station is currently playing and when it started
-
 local stationStates = {}
 local vehicleStations = {} -- [netId] = stationIndex
 
@@ -12,6 +9,10 @@ for i, station in ipairs(Config.Stations) do
     }
 end
 
+local function elapsedSeconds(startedAt)
+    return (GetGameTimer() - startedAt) / 1000.0
+end
+
 -- Advance to next song in a station
 local function advanceSong(stationIndex)
     local station = Config.Stations[stationIndex]
@@ -19,17 +20,9 @@ local function advanceSong(stationIndex)
     local state = stationStates[stationIndex]
 
     state.songIndex = state.songIndex + 1
-    if state.songIndex > #station.songs then
-        state.songIndex = 1
-    end
+    if state.songIndex > #station.songs then state.songIndex = 1 end
     state.startedAt = GetGameTimer()
-
-    -- Broadcast to all clients
     TriggerClientEvent('ob_radio_2:songChanged', -1, stationIndex, state.songIndex, station.songs[state.songIndex])
-end
-
-local function elapsedSeconds(startedAt)
-    return (GetGameTimer() - startedAt) / 1000.0
 end
 
 -- Song rotation thread
@@ -105,7 +98,7 @@ RegisterCommand('skipsong', function(source, args)
     -- source == 0 means it was executed from the server console
     if source ~= 0 then
         if not IsPlayerAceAllowed(source, 'ob_radio_2.skip') then
-            TriggerClientEvent('chat:addMessage', source, { args = { '[Radio]', '^1You are not allowed to use this command.' } })
+            TriggerClientEvent('ox_lib:notify', source, { title = 'Radio', description = 'You are not allowed to use this command.', type = 'error' })
             return
         end
     end
@@ -114,7 +107,7 @@ RegisterCommand('skipsong', function(source, args)
     if not stationIndex or not Config.Stations[stationIndex] then
         local msg = ('Usage: /skipsong <stationIndex>   (1-%d)'):format(#Config.Stations)
         if source == 0 then print(msg)
-        else TriggerClientEvent('chat:addMessage', source, { args = { '[Radio]', msg } }) end
+        else TriggerClientEvent('ox_lib:notify', source, { title = 'Radio', description = msg, type = 'inform' }) end
         return
     end
 
@@ -122,9 +115,9 @@ RegisterCommand('skipsong', function(source, args)
 
     local station = Config.Stations[stationIndex]
     local song = station.songs[stationStates[stationIndex].songIndex]
-    local announce = ('^2Skipped on %s. Now playing: %s — %s'):format(station.label, song.title or '', song.artist or '')
+    local announce = ('Skipped on %s. Now playing: %s — %s'):format(station.label, song.title or '', song.artist or '')
     if source == 0 then print(announce)
-    else TriggerClientEvent('chat:addMessage', source, { args = { '[Radio]', announce } }) end
+    else TriggerClientEvent('ox_lib:notify', source, { title = 'Radio', description = announce, type = 'success' }) end
 end, true) -- restricted = true (requires ACE)
 
 -- Clean up when vehicle is deleted

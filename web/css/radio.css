@@ -30,6 +30,11 @@ body {
     justify-content: center;
     z-index: 9999;
     animation: wheelFadeIn 180ms ease-out;
+    background: radial-gradient(circle at center,
+        rgba(0,0,0,0.65) 0%,
+        rgba(0,0,0,0.45) 30%,
+        rgba(0,0,0,0.15) 55%,
+        transparent 75%);
 }
 
 @keyframes wheelFadeIn {
@@ -196,18 +201,14 @@ body {
 /* ============================================ */
 
 #volume-control {
-    position: absolute;
-    bottom: 6%;
-    left: 50%;
-    transform: translateX(-50%);
     display: flex;
     align-items: center;
     gap: 10px;
-    z-index: 10;
-    background: rgba(0, 0, 0, 0.5);
-    border: 1px solid rgba(255,255,255,0.1);
+    margin-top: 14px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255,255,255,0.08);
     border-radius: 999px;
-    padding: 8px 18px;
+    padding: 6px 14px;
 }
 
 #volume-label {
@@ -219,11 +220,12 @@ body {
 
 #volume-slider {
     -webkit-appearance: none;
-    width: 140px;
+    width: 120px;
     height: 4px;
     border-radius: 2px;
     background: rgba(255,255,255,0.2);
     outline: none;
+    pointer-events: none;
 }
 
 #volume-slider::-webkit-slider-thumb {
@@ -260,7 +262,8 @@ body {
     z-index: 5000;
     pointer-events: none;
     animation: npbFadeIn 250ms ease-out;
-    max-width: 320px;
+    width: 260px;
+    box-sizing: border-box;
 }
 
 @keyframes npbFadeIn {
@@ -282,15 +285,16 @@ body {
     flex-direction: column;
     line-height: 1.25;
     min-width: 0;
+    flex: 1 1 auto;
 }
 
 #npb-title {
     font-size: 14px;
     font-weight: 600;
     color: #fff;
-    white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 100%;
 }
 
 #npb-meta {
@@ -302,7 +306,7 @@ body {
     color: #aaa;
     margin-top: 3px;
     white-space: nowrap;
-    overflow: hidden;
+    width: 100%;
 }
 
 #npb-play {
@@ -310,13 +314,23 @@ body {
     color: #aaa;
 }
 
-#npb-meta .npb-sep {
-    color: #aaa;
-    font-weight: 700;
-    line-height: 1;
+#npb-artist {
+    overflow: hidden;
+    flex: 1 1 0;
+    min-width: 0;
 }
 
-#npb-station, #npb-artist {
-    overflow: hidden;
-    text-overflow: ellipsis;
+#npb-artist .scroll-inner,
+#npb-title .scroll-inner {
+    display: inline-block;
+    white-space: nowrap;
+}
+
+.scrolling .scroll-inner {
+    animation: npbMarquee 12s linear infinite;
+}
+
+@keyframes npbMarquee {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
 }

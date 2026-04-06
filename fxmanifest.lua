@@ -14,6 +14,7 @@ shared_scripts {
 
 client_scripts {
     'client/main.lua',
+    'client/environment.lua',
     'client/spatial.lua',
 }
 
