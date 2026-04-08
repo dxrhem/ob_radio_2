@@ -5,6 +5,15 @@ Config.MaxAudioDistance = 30.0     -- meters - beyond this, silent
 Config.MuffleStartDistance = 5.0   -- meters - lowpass filter begins
 Config.DisableNativeRadio = true   -- Disable GTA's built-in radio
 
+Config.AudioRoofOcclusion = {
+    [0] = { occlusion = 0.40, cutoff = 1200 },  -- RAISED
+    [1] = { occlusion = 0.65, cutoff = 22000 }, -- LOWERING
+    [2] = { occlusion = 0.65, cutoff = 22000 }, -- LOWERED
+    [3] = { occlusion = 0.65, cutoff = 22000 }, -- RAISING
+    [5] = { occlusion = 0.40, cutoff = 1200 },  -- STUCK_RAISED
+    [6] = { occlusion = 0.65, cutoff = 22000 }, -- STUCK_LOWERED
+}
+
 -- Vehicles where the radio is disabled.
 -- Class 18 = Emergency (police, ambulance, firetruck).
 Config.DisableInEmergencyClass = true
