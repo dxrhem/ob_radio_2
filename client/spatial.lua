@@ -52,6 +52,10 @@ local function getOpenOrBrokenDoorCount(vehicle)
 end
 
 local function getVehicleRoofOcclusion(vehicle)
+    if not vehicle or not DoesEntityExist(vehicle) then
+        return 0.55, 1800
+    end
+
     local vehicleClass = GetVehicleClass(vehicle)
 
     local hasRoof = DoesVehicleHaveRoof(vehicle)
