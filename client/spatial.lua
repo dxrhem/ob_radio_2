@@ -35,68 +35,6 @@ local function findNearestRadioVehicle(playerCoords)
     return closestVeh, closestDist
 end
 
-local function getOpenOrBrokenDoorCount(vehicle)
-    local doorCount = GetNumberOfVehicleDoors(vehicle)
-    local openCount = 0
-
-    for i = 0, doorCount - 1 do
-        local isDoorOpen = GetVehicleDoorAngleRatio(vehicle, i) > 0.0
-        local isDoorDamaged = IsVehicleDoorDamaged(vehicle, i)
-
-        if isDoorOpen or isDoorDamaged then
-            openCount = openCount + 1
-        end
-    end
-
-    return openCount
-end
-
-local function getVehicleRoofOcclusion(vehicle)
-    if not vehicle or not DoesEntityExist(vehicle) then
-        return 0.55, 1800
-    end
-
-    local vehicleClass = GetVehicleClass(vehicle)
-
-    local hasRoof = DoesVehicleHaveRoof(vehicle)
-    local isVehicleABike = (vehicleClass == 8 or vehicleClass == 13)
-
-    -- Bikes and convertibles with no roof have minimal occlusion
-    if isVehicleABike or not hasRoof then
-        return 0.65, 22000
-    end
-
-    -- Get roof state and corresponding occlusion values
-    local roofState = GetConvertibleRoofState(vehicle)
-    local roofOcclusion = Config.AudioRoofOcclusion[roofState] or Config.AudioRoofOcclusion[0]
-
-    -- Start with base occlusion from roof state
-    local occlusionValue = roofOcclusion.occlusion
-    local cutoffFrequency = roofOcclusion.cutoff
-
-    -- Adjust occlusion based on open/broken doors and windows
-    local openDoors = getOpenOrBrokenDoorCount(vehicle)
-    local hasBrokenWindows = not AreAllVehicleWindowsIntact(vehicle)
-
-    -- Each broken window adds 0.10 occlusion and 1500 Hz cutoff increase
-    if hasBrokenWindows then
-        occlusionValue = occlusionValue + 0.10
-        cutoffFrequency = cutoffFrequency + 1500
-    end
-
-    -- Each open/broken door adds 0.05 occlusion and 1500 Hz cutoff increase
-    if openDoors > 0 then
-        occlusionValue = occlusionValue + (openDoors * 0.05)
-        cutoffFrequency = cutoffFrequency + (openDoors * 1500)
-    end
-
-    -- Clamp values to reasonable ranges
-    occlusionValue = math.max(0.0, occlusionValue)
-    cutoffFrequency = math.min(22000, cutoffFrequency)
-
-    return occlusionValue, cutoffFrequency
-end
-
 CreateThread(function()
     while true do
         if isInVehicle and currentStation then
@@ -120,11 +58,12 @@ CreateThread(function()
             end
 
             -- Outside vehicle but radio still playing
-            local playerPed = PlayerPedId()
-            local playerCoords = GetEntityCoords(playerPed)
+            local playerCoords = GetEntityCoords(PlayerPedId())
+            local _, dist = findNearestRadioVehicle(playerCoords)
 
-            local vehicle, dist = findNearestRadioVehicle(playerCoords)
-            local bodyBlockVolume, bodyBlockFilter = getVehicleRoofOcclusion(vehicle)
+            -- Base "vehicle body blocking" effect — always muffled when outside
+            local bodyBlockVolume = 0.55
+            local bodyBlockFilter = 1800
 
             -- Clamp distance to MaxAudioDistance for calculation (so it saturates at silent)
             local clampedDist = math.min(dist, Config.MaxAudioDistance)

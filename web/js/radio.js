@@ -215,57 +215,6 @@ class RadioWheel {
         this.updateNowPlaying(song);
         if (!this.isOpen) this.showNowPlayingBar();
     }
-
-    _formatTime(seconds) {
-        const s = Math.max(0, Math.floor(seconds));
-        const m = Math.floor(s / 60);
-        const sec = s % 60;
-        return m + ':' + (sec < 10 ? '0' : '') + sec;
-    }
-
-    startProgress(duration, offset) {
-        this.stopProgress();
-        if (!duration || duration <= 0) return;
-
-        const fill = document.getElementById('npb-progress-fill');
-        const dot = document.getElementById('npb-progress-dot');
-        const timeCurrent = document.getElementById('npb-time-current');
-        const timeTotal = document.getElementById('npb-time-total');
-        if (!fill) return;
-
-        if (timeTotal) timeTotal.textContent = this._formatTime(duration);
-
-        const startTime = Date.now() - (offset * 1000);
-        const durationMs = duration * 1000;
-
-        const tick = () => {
-            const elapsed = Date.now() - startTime;
-            const elapsedSec = elapsed / 1000;
-            const pct = Math.min(100, (elapsed / durationMs) * 100);
-            fill.style.width = pct + '%';
-            if (dot) dot.style.left = pct + '%';
-            if (timeCurrent) timeCurrent.textContent = this._formatTime(Math.min(elapsedSec, duration));
-            if (pct < 100) {
-                this._progressRaf = requestAnimationFrame(tick);
-            }
-        };
-        tick();
-    }
-
-    stopProgress() {
-        if (this._progressRaf) {
-            cancelAnimationFrame(this._progressRaf);
-            this._progressRaf = null;
-        }
-        const fill = document.getElementById('npb-progress-fill');
-        const dot = document.getElementById('npb-progress-dot');
-        const timeCurrent = document.getElementById('npb-time-current');
-        const timeTotal = document.getElementById('npb-time-total');
-        if (fill) fill.style.width = '0%';
-        if (dot) dot.style.left = '0%';
-        if (timeCurrent) timeCurrent.textContent = '0:00';
-        if (timeTotal) timeTotal.textContent = '0:00';
-    }
 }
 
 const radioWheel = new RadioWheel();

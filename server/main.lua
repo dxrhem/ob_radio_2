@@ -9,6 +9,25 @@ for i, station in ipairs(Config.Stations) do
     }
 end
 
+-- ── CDN prefix resolver ────────────────────────────────────────────────
+-- Every time a song is sent to a client we run its `file` through this so
+-- relative paths like "sleeptoken/jericho.mp3" become absolute CDN URLs
+-- (or stay relative for local playback) without mutating Config.Stations.
+local function resolveSong(song)
+    if not song then return song end
+    local base = Config.CDNBaseUrl
+    if not base or base == '' then return song end
+    local file = song.file or ''
+    if file:match('^https?://') then return song end
+    local prefix = base:gsub('/+$', '')
+    return {
+        file     = prefix .. '/' .. file,
+        title    = song.title,
+        artist   = song.artist,
+        duration = song.duration,
+    }
+end
+
 local function elapsedSeconds(startedAt)
     return (GetGameTimer() - startedAt) / 1000.0
 end
@@ -22,7 +41,7 @@ local function advanceSong(stationIndex)
     state.songIndex = state.songIndex + 1
     if state.songIndex > #station.songs then state.songIndex = 1 end
     state.startedAt = GetGameTimer()
-    TriggerClientEvent('ob_radio_2:songChanged', -1, stationIndex, state.songIndex, station.songs[state.songIndex])
+    TriggerClientEvent('ob_radio_2:songChanged', -1, stationIndex, state.songIndex, resolveSong(station.songs[state.songIndex]))
 end
 
 -- Song rotation thread
@@ -46,7 +65,7 @@ lib.callback.register('ob_radio_2:tuneIn', function(source, stationIndex, vehicl
     if not station then return nil end
 
     local state = stationStates[stationIndex]
-    local song = station.songs[state.songIndex]
+    local song = resolveSong(station.songs[state.songIndex])
     local elapsed = elapsedSeconds(state.startedAt)
 
     local syncData = {
@@ -81,7 +100,7 @@ lib.callback.register('ob_radio_2:getVehicleStation', function(source, vehicleNe
 
     local station = Config.Stations[stationIndex]
     local state = stationStates[stationIndex]
-    local song = station.songs[state.songIndex]
+    local song = resolveSong(station.songs[state.songIndex])
     local elapsed = elapsedSeconds(state.startedAt)
 
     return {

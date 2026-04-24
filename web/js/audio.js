@@ -1,3 +1,7 @@
+// Cache bucket name — bump if you ever need to invalidate every client's
+// persisted audio at once (e.g. after re-encoding the library).
+const AUDIO_CACHE_NAME = 'ob_radio_2_v1';
+
 class RadioAudio {
     constructor() {
         this.ctx = null;
@@ -28,22 +32,61 @@ class RadioAudio {
         if (!songFile || songFile === '.ogg') return null;
         if (this.buffers[songFile]) return this.buffers[songFile];
         if (this.loading[songFile]) return this.loading[songFile];
+
+        // Absolute URLs → CDN; relative → local asset server under ./songs/.
+        // Don't pre-encode: fetch() normalises fine and the FiveM asset server
+        // matches globs after decoding, so a manual encode would double-decode.
+        const isAbsolute = /^https?:\/\//i.test(songFile);
+        const url = isAbsolute ? songFile : ('../songs/' + songFile);
+
         this.loading[songFile] = (async () => {
             try {
-                const res = await fetch('../songs/' + songFile);
-                if (!res.ok) throw new Error('HTTP ' + res.status);
-                const data = await res.arrayBuffer();
-                const buffer = await this.ctx.decodeAudioData(data);
+                // Two-tier cache:
+                //   1. this.buffers — decoded AudioBuffers in RAM (fastest, lost on NUI reload)
+                //   2. Cache API  — raw bytes persisted by CEF to disk for next session
+                let arrayBuf = null;
+                let cache = null;
+                try {
+                    cache = await caches.open(AUDIO_CACHE_NAME);
+                    const cached = await cache.match(url);
+                    if (cached) {
+                        arrayBuf = await cached.arrayBuffer();
+                    }
+                } catch (_) { /* Cache API unavailable — fall through to network */ }
+
+                if (!arrayBuf) {
+                    const res = await fetch(url);
+                    if (!res.ok) throw new Error('HTTP ' + res.status);
+                    // Clone before reading: one copy for us, one for the cache.
+                    if (cache) {
+                        try { await cache.put(url, res.clone()); } catch (_) {}
+                    }
+                    arrayBuf = await res.arrayBuffer();
+                }
+
+                const buffer = await this.ctx.decodeAudioData(arrayBuf);
                 this.buffers[songFile] = buffer;
                 return buffer;
             } catch (e) {
-                console.error('[ob_radio_2] failed to load ' + songFile + ': ' + e.message);
+                console.error('[ob_radio_2] failed to load ' + songFile + ' → ' + url + ': ' + e.message);
                 return null;
             } finally {
                 delete this.loading[songFile];
             }
         })();
         return this.loading[songFile];
+    }
+
+    // Admin-facing: wipe both cache tiers (useful after swapping CDN URLs or
+    // re-encoding the library).
+    async clearCache() {
+        this.buffers = {};
+        try {
+            await caches.delete(AUDIO_CACHE_NAME);
+            console.log('[ob_radio_2] audio cache cleared');
+        } catch (e) {
+            console.warn('[ob_radio_2] cache clear failed:', e);
+        }
     }
 
     _stopCurrentSource() {

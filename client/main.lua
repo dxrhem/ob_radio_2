@@ -79,20 +79,6 @@ CreateThread(function()
         -- Sync once per vehicle entry (or first poll tick after resource restart)
         if isInVehicle and not radioDisabledForVehicle and not hasSyncedForEntry then
             hasSyncedForEntry = true
-
-            -- Restore per-vehicle volume
-            local plate = GetVehicleNumberPlateText(veh)
-            if plate then
-                plate = plate:gsub('%s+', '')
-                local savedVehVol = GetResourceKvpString('ob_radio_2:vehvol:' .. plate)
-                if savedVehVol then
-                    playerVolume = tonumber(savedVehVol) or Config.DefaultVolume
-                else
-                    playerVolume = Config.DefaultVolume
-                end
-                SendNUIMessage({ action = 'setVolume', volume = playerVolume })
-            end
-
             local netId = VehToNet(veh)
             local syncData = lib.callback.await('ob_radio_2:getVehicleStation', false, netId)
             if syncData then
@@ -172,17 +158,6 @@ RegisterKeyMapping('+ob_radio_wheel', 'Open Radio Wheel (hold)', 'keyboard', 'Q'
 local function setVolume(vol)
     playerVolume = math.max(0.0, math.min(1.0, vol))
     SetResourceKvp('ob_radio_2:volume', tostring(playerVolume))
-
-    -- Save per-vehicle volume
-    local veh = GetVehiclePedIsIn(PlayerPedId(), false)
-    if veh ~= 0 then
-        local plate = GetVehicleNumberPlateText(veh)
-        if plate then
-            plate = plate:gsub('%s+', '')
-            SetResourceKvp('ob_radio_2:vehvol:' .. plate, tostring(playerVolume))
-        end
-    end
-
     SendNUIMessage({ action = 'setVolume', volume = playerVolume })
 end
 
@@ -319,3 +294,12 @@ end)
 exports('isRadioPlaying', function()
     return currentStation ~= nil
 end)
+
+-- Wipe the NUI audio cache (both in-memory + persisted Cache API). Useful
+-- after swapping CDN URLs or re-encoding tracks so clients refetch fresh.
+RegisterCommand('clearradiocache', function()
+    SendNUIMessage({ action = 'clearCache' })
+    lib.notify({ title = 'Radio', description = 'Audio cache cleared — next play will refetch.', type = 'inform' })
+end, false)
+TriggerEvent('chat:addSuggestion', '/clearradiocache', 'Clear the persisted radio audio cache', {})
+

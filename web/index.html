@@ -24,27 +24,23 @@
                     <input type="range" id="volume-slider" min="0" max="100" value="70">
                     <div id="volume-value">70%</div>
                 </div>
+                <div id="volume-hint">
+                    <span class="vol-key">↑</span>
+                    <span class="vol-hint-text">Volume</span>
+                    <span class="vol-key">↓</span>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Now Playing Bar (only when in vehicle, wheel closed) -->
     <div id="now-playing-bar" class="hidden">
-        <div id="npb-top">
-            <img id="npb-logo" alt="">
-            <div id="npb-info">
-                <div id="npb-title"><span class="scroll-inner"></span></div>
-                <div id="npb-artist"><span class="scroll-inner"></span></div>
-            </div>
-        </div>
-        <div id="npb-progress-wrapper">
-            <div id="npb-progress">
-                <div id="npb-progress-fill"></div>
-                <div id="npb-progress-dot"></div>
-            </div>
-            <div id="npb-times">
-                <span id="npb-time-current">0:00</span>
-                <span id="npb-time-total">0:00</span>
+        <img id="npb-logo" alt="">
+        <div id="npb-info">
+            <div id="npb-title"><span class="scroll-inner"></span></div>
+            <div id="npb-meta">
+                <svg id="npb-play" viewBox="0 0 16 16" width="12" height="12"><path fill="currentColor" d="M4 2.5v11l10-5.5z"/></svg>
+                <span id="npb-artist"><span class="scroll-inner"></span></span>
             </div>
         </div>
     </div>
